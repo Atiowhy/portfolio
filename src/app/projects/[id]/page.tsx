@@ -150,9 +150,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">The Challenge</h2>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap text-lg relative">
-                {project.challenge || "Detail tantangan belum ditambahkan."}
-              </p>
+              {project.challenge ? (
+                <div 
+                  className="prose prose-sm lg:prose-base dark:prose-invert max-w-none text-gray-600 dark:text-gray-400 relative"
+                  dangerouslySetInnerHTML={{ __html: project.challenge }}
+                />
+              ) : (
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg relative">
+                  Detail tantangan belum ditambahkan.
+                </p>
+              )}
             </div>
 
             {/* Solution Card */}
@@ -164,9 +171,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">The Solution</h2>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap text-lg relative">
-                {project.solution || "Detail solusi belum ditambahkan."}
-              </p>
+              {project.solution ? (
+                <div 
+                  className="prose prose-sm lg:prose-base dark:prose-invert max-w-none text-gray-600 dark:text-gray-400 relative"
+                  dangerouslySetInnerHTML={{ __html: project.solution }}
+                />
+              ) : (
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg relative">
+                  Detail solusi belum ditambahkan.
+                </p>
+              )}
             </div>
           </div>
         </div>
