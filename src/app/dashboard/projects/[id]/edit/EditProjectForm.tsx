@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState, useCallback } from "react";
-import { createProjectAction, FormState } from "./actions";
+import { updateProjectAction, FormState } from "./actions";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { X, Image as ImageIcon } from "lucide-react";
@@ -27,26 +27,33 @@ const MenuBar = ({ editor }: { editor: any }) => {
   );
 };
 
-export default function ProjectForm({ categories, tags }: { categories: any[], tags: any[] }) {
-  const [state, formAction] = useActionState<FormState, FormData>(createProjectAction, { success: true, message: "" });
+export default function EditProjectForm({ project, categories, tags }: { project: any, categories: any[], tags: any[] }) {
+  const [state, formAction] = useActionState<FormState, FormData>(updateProjectAction, { success: true, message: "" });
   
   // Image states
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<{file: File, url: string}[]>([]);
 
+  // Find existing primary image
+  const existingPrimaryImage = project.project_images?.find((img: any) => img.is_primary)?.image_url;
+
   // Tiptap Editors
   const challengeEditor = useEditor({
     extensions: [StarterKit, LinkExtension],
-    content: "",
+    content: project.challenge || "",
     editorProps: { attributes: { className: "prose prose-sm dark:prose-invert max-w-none p-4 min-h-[150px] outline-none" } }
   });
 
   const solutionEditor = useEditor({
     extensions: [StarterKit, LinkExtension],
-    content: "",
+    content: project.solution || "",
     editorProps: { attributes: { className: "prose prose-sm dark:prose-invert max-w-none p-4 min-h-[150px] outline-none" } }
   });
+
+  // Extract selected IDs
+  const existingCategoryIds = project.project_categories?.map((pc: any) => pc.category_id) || [];
+  const existingTagIds = project.project_tags?.map((pt: any) => pt.tag_id) || [];
 
   // Handle Toasts for form errors
   useEffect(() => {
@@ -84,14 +91,9 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
     setThumbnailUrl(null);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // We let the native form submit happen by not calling e.preventDefault()
-    // BUT we need to inject the tiptap and file data into the FormData.
-    // Instead of hijacking submit, we can just use the formAction directly.
-  };
-
   // Wrapper action to intercept submission and inject non-standard inputs
   const actionWithExtraData = (formData: FormData) => {
+    formData.set("project_id", project.id);
     formData.set("challenge", challengeEditor?.getHTML() || "");
     formData.set("solution", solutionEditor?.getHTML() || "");
     
@@ -115,13 +117,13 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
         {/* Title */}
         <div className="md:col-span-2">
           <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">Judul Proyek *</label>
-          <input type="text" id="title" name="title" required className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-400 outline-none text-white transition-all backdrop-blur-sm" />
+          <input type="text" id="title" name="title" defaultValue={project.title} required className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-400 outline-none text-white transition-all backdrop-blur-sm" />
           {state?.errors?.title && <p className="text-red-400 text-sm mt-1">{state.errors.title[0]}</p>}
         </div>
 
         {/* Thumbnail Image Drag & Drop */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-300 mb-2">Gambar Utama (Thumbnail)</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Gambar Utama (Thumbnail Baru)</label>
           <div {...getThumbProps()} className="border-2 border-dashed border-white/20 bg-white/5 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 hover:border-cyan-400/50 transition-all backdrop-blur-sm group">
             <input {...getThumbInputProps()} />
             {thumbnailUrl ? (
@@ -130,6 +132,11 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
                 <button type="button" onClick={clearThumbnail} className="absolute -top-3 -right-3 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-[0_0_10px_rgba(239,68,68,0.5)] transition-all">
                   <X className="w-4 h-4" />
                 </button>
+              </div>
+            ) : existingPrimaryImage ? (
+              <div className="text-center">
+                 <img src={existingPrimaryImage} alt="Existing thumbnail" className="max-h-48 object-contain rounded-lg shadow-lg mx-auto mb-4 opacity-50" />
+                 <p className="mt-4 text-sm text-gray-400">Gambar saat ini. Tarik dan lepas gambar di sini untuk mengubahnya.</p>
               </div>
             ) : (
               <div className="text-center">
@@ -142,12 +149,12 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
 
         {/* Gallery Images Drag & Drop */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-300 mb-2">Gambar Gallery Tambahan (Opsional)</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Tambah Gambar Gallery (Akan ditambahkan ke gallery yang sudah ada)</label>
           <div {...getGalleryProps()} className="border-2 border-dashed border-white/20 bg-white/5 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 hover:border-purple-400/50 transition-all backdrop-blur-sm group mb-4">
             <input {...getGalleryInputProps()} />
             <div className="text-center">
               <ImageIcon className="mx-auto h-8 w-8 text-gray-500 group-hover:text-purple-400 transition-colors" />
-              <p className="mt-4 text-sm text-gray-400">Tarik dan lepas banyak gambar di sini, atau klik untuk memilih</p>
+              <p className="mt-4 text-sm text-gray-400">Tarik dan lepas banyak gambar di sini, atau klik untuk menambahkan</p>
             </div>
           </div>
           {galleryFiles.length > 0 && (
@@ -190,13 +197,13 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
         {/* URLs */}
         <div>
           <label htmlFor="live_demo_url" className="block text-sm font-medium text-gray-300 mb-2">URL Live Demo</label>
-          <input type="url" id="live_demo_url" name="live_demo_url" placeholder="https://..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-400 outline-none text-white transition-all backdrop-blur-sm placeholder:text-gray-600" />
+          <input type="url" id="live_demo_url" name="live_demo_url" defaultValue={project.live_demo_url || ""} placeholder="https://..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-400 outline-none text-white transition-all backdrop-blur-sm placeholder:text-gray-600" />
           {state?.errors?.live_demo_url && <p className="text-red-400 text-sm mt-1">{state.errors.live_demo_url[0]}</p>}
         </div>
 
         <div>
           <label htmlFor="repo_url" className="block text-sm font-medium text-gray-300 mb-2">URL Repository (Github)</label>
-          <input type="url" id="repo_url" name="repo_url" placeholder="https://github.com/..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 outline-none text-white transition-all backdrop-blur-sm placeholder:text-gray-600" />
+          <input type="url" id="repo_url" name="repo_url" defaultValue={project.repo_url || ""} placeholder="https://github.com/..." className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 outline-none text-white transition-all backdrop-blur-sm placeholder:text-gray-600" />
           {state?.errors?.repo_url && <p className="text-red-400 text-sm mt-1">{state.errors.repo_url[0]}</p>}
         </div>
 
@@ -206,7 +213,7 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
           <div className="space-y-2 max-h-48 overflow-y-auto p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm custom-scrollbar">
             {categories?.map(cat => (
               <div key={cat.id} className="flex items-center group cursor-pointer">
-                <input type="checkbox" id={`cat-${cat.id}`} name="categories" value={cat.id} className="h-4 w-4 bg-black/40 border-white/20 rounded text-cyan-500 focus:ring-cyan-500/50 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer" />
+                <input type="checkbox" id={`cat-${cat.id}`} name="categories" value={cat.id} defaultChecked={existingCategoryIds.includes(cat.id)} className="h-4 w-4 bg-black/40 border-white/20 rounded text-cyan-500 focus:ring-cyan-500/50 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer" />
                 <label htmlFor={`cat-${cat.id}`} className="ml-3 block text-sm text-gray-400 group-hover:text-cyan-300 transition-colors cursor-pointer">{cat.name}</label>
               </div>
             ))}
@@ -220,7 +227,7 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
           <div className="space-y-2 max-h-48 overflow-y-auto p-4 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm custom-scrollbar">
             {tags?.map(tag => (
               <div key={tag.id} className="flex items-center group cursor-pointer">
-                <input type="checkbox" id={`tag-${tag.id}`} name="tags" value={tag.id} className="h-4 w-4 bg-black/40 border-white/20 rounded text-purple-500 focus:ring-purple-500/50 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer" />
+                <input type="checkbox" id={`tag-${tag.id}`} name="tags" value={tag.id} defaultChecked={existingTagIds.includes(tag.id)} className="h-4 w-4 bg-black/40 border-white/20 rounded text-purple-500 focus:ring-purple-500/50 focus:ring-offset-0 focus:ring-offset-transparent cursor-pointer" />
                 <label htmlFor={`tag-${tag.id}`} className="ml-3 block text-sm text-gray-400 group-hover:text-purple-300 transition-colors cursor-pointer">{tag.name}</label>
               </div>
             ))}
@@ -232,8 +239,8 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
 
       <div className="mt-8 flex justify-end">
         <SubmitButton 
-          defaultText="Inisiasi Protokol Penyimpanan" 
-          loadingText="Memproses Transmisi..."
+          defaultText="Inisiasi Pembaruan Data" 
+          loadingText="Menyinkronkan..."
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] hover:scale-105 text-white font-bold py-3 px-8 rounded-full border border-purple-500/30 transition-all duration-300"
         />
       </div>
