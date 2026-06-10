@@ -29,11 +29,11 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
 export default function ProjectForm({ categories, tags }: { categories: any[], tags: any[] }) {
   const [state, formAction] = useActionState<FormState, FormData>(createProjectAction, { success: true, message: "" });
-  
+
   // Image states
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [galleryFiles, setGalleryFiles] = useState<{file: File, url: string}[]>([]);
+  const [galleryFiles, setGalleryFiles] = useState<{ file: File, url: string }[]>([]);
 
   // Tiptap Editors
   const challengeEditor = useEditor({
@@ -62,7 +62,7 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
       setThumbnailUrl(URL.createObjectURL(acceptedFiles[0]));
     }
   }, []);
-  const { getRootProps: getThumbProps, getInputProps: getThumbInputProps } = useDropzone({ onDrop: onDropThumbnail, accept: {'image/*': []}, maxFiles: 1 });
+  const { getRootProps: getThumbProps, getInputProps: getThumbInputProps } = useDropzone({ onDrop: onDropThumbnail, accept: { 'image/*': [] }, maxFiles: 1 });
 
   // Dropzone for Gallery
   const onDropGallery = useCallback((acceptedFiles: File[]) => {
@@ -72,7 +72,7 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
     }));
     setGalleryFiles(prev => [...prev, ...newFiles]);
   }, []);
-  const { getRootProps: getGalleryProps, getInputProps: getGalleryInputProps } = useDropzone({ onDrop: onDropGallery, accept: {'image/*': []} });
+  const { getRootProps: getGalleryProps, getInputProps: getGalleryInputProps } = useDropzone({ onDrop: onDropGallery, accept: { 'image/*': [] } });
 
   const removeGalleryImage = (index: number) => {
     setGalleryFiles(prev => prev.filter((_, i) => i !== index));
@@ -94,11 +94,11 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
   const actionWithExtraData = (formData: FormData) => {
     formData.set("challenge", challengeEditor?.getHTML() || "");
     formData.set("solution", solutionEditor?.getHTML() || "");
-    
+
     if (thumbnailFile) {
       formData.set("image", thumbnailFile);
     }
-    
+
     // Clear out any empty file inputs that might have been automatically included
     formData.delete("gallery_images");
     galleryFiles.forEach((item) => {
@@ -111,7 +111,7 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
   return (
     <form action={actionWithExtraData} className="flex flex-col gap-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
+
         {/* Title */}
         <div className="md:col-span-2">
           <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">Judul Proyek *</label>
@@ -231,8 +231,8 @@ export default function ProjectForm({ categories, tags }: { categories: any[], t
       </div>
 
       <div className="mt-8 flex justify-end">
-        <SubmitButton 
-          defaultText="Inisiasi Protokol Penyimpanan" 
+        <SubmitButton
+          defaultText="Inisiasi Protokol Penyimpanan"
           loadingText="Memproses Transmisi..."
           className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] hover:scale-105 text-white font-bold py-3 px-8 rounded-full border border-purple-500/30 transition-all duration-300"
         />
