@@ -21,7 +21,7 @@ export default async function HomePage() {
       {/* Background Decorative Gradients */}
       <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] opacity-70 animate-pulse"></div>
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full mix-blend-screen filter blur-[120px] opacity-50"></div>
-      
+
       {/* Navbar */}
       <header className="fixed top-0 w-full glass-navbar z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -38,12 +38,12 @@ export default async function HomePage() {
             <Link href="#portofolio" className="hover:text-purple-400 transition-colors">Portofolio</Link>
           </nav>
           <a
-            href="https://wa.me/6281234567890"
+            href="https://wa.me/6285774471157"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden md:inline-flex relative overflow-hidden px-6 py-2.5 rounded-full font-medium text-cyan-400 border border-cyan-500/50 bg-transparent hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300"
           >
-            Hubungi Kami
+            Hubungi Saya
           </a>
         </div>
       </header>
@@ -57,7 +57,7 @@ export default async function HomePage() {
               Tersedia untuk proyek masa depan
             </div>
             <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1]">
-              Transformasi Ide Menjadi <br/>
+              Transformasi Ide Menjadi <br />
               <span className="neon-text">Realitas Digital</span>
             </h1>
             <p className="text-lg lg:text-xl text-gray-400 max-w-2xl leading-relaxed">
@@ -140,7 +140,7 @@ export default async function HomePage() {
                       <h3 className="text-xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors">
                         {project.title}
                       </h3>
-                      <div 
+                      <div
                         className="text-gray-400 line-clamp-2 text-sm flex-1 mb-6 prose prose-sm prose-invert"
                         dangerouslySetInnerHTML={{ __html: project.challenge || "Deskripsi tantangan proyek." }}
                       />
