@@ -35,8 +35,9 @@ export default function EditProjectForm({ project, categories, tags }: { project
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<{file: File, url: string}[]>([]);
 
-  // Find existing primary image
+  // Find existing primary and gallery images
   const existingPrimaryImage = project.project_images?.find((img: any) => img.is_primary)?.image_url;
+  const existingGalleryImages = project.project_images?.filter((img: any) => !img.is_primary) || [];
 
   // Tiptap Editors
   const challengeEditor = useEditor({
@@ -157,17 +158,34 @@ export default function EditProjectForm({ project, categories, tags }: { project
               <p className="mt-4 text-sm text-gray-400">Tarik dan lepas banyak gambar di sini, atau klik untuk menambahkan</p>
             </div>
           </div>
+
+          {existingGalleryImages.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2 mt-4">Gambar Gallery Saat Ini:</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {existingGalleryImages.map((img: any, idx: number) => (
+                  <div key={`existing-${idx}`} className="relative group rounded-xl overflow-hidden shadow-lg border border-white/10">
+                    <img src={img.image_url} alt={`Existing Gallery ${idx}`} className="h-32 w-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {galleryFiles.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-              {galleryFiles.map((item, idx) => (
-                <div key={idx} className="relative group rounded-xl overflow-hidden shadow-lg">
-                  <img src={item.url} alt={`Gallery ${idx}`} className="h-32 w-full object-cover border border-white/10" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <button type="button" onClick={() => removeGalleryImage(idx)} className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-[0_0_10px_rgba(239,68,68,0.5)]">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-2 mt-4">Gambar Gallery Baru:</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {galleryFiles.map((item, idx) => (
+                  <div key={idx} className="relative group rounded-xl overflow-hidden shadow-lg border border-white/10">
+                    <img src={item.url} alt={`Gallery ${idx}`} className="h-32 w-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <button type="button" onClick={() => removeGalleryImage(idx)} className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
