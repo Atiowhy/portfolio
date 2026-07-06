@@ -128,7 +128,10 @@ export async function updateProjectAction(prevState: FormState, formData: FormDa
       const deletePromise = supabase
         .from("project_images")
         .delete()
-        .in("id", deletedGalleryImageIds);
+        .in("id", deletedGalleryImageIds)
+        .then(({ error }) => {
+          if (error) throw error;
+        });
       uploadPromises.push(deletePromise);
     }
 
