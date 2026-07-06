@@ -14,7 +14,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     .from("projects")
     .select(`
       *,
-      project_images(image_url, is_primary),
+      project_images(id, image_url, is_primary),
       project_categories(category_id),
       project_tags(tag_id)
     `)

@@ -37,7 +37,10 @@ export default function EditProjectForm({ project, categories, tags }: { project
 
   // Find existing primary and gallery images
   const existingPrimaryImage = project.project_images?.find((img: any) => img.is_primary)?.image_url;
-  const existingGalleryImages = project.project_images?.filter((img: any) => !img.is_primary) || [];
+  const [existingGalleryImages, setExistingGalleryImages] = useState<any[]>(
+    project.project_images?.filter((img: any) => !img.is_primary) || []
+  );
+  const [deletedGalleryImageIds, setDeletedGalleryImageIds] = useState<string[]>([]);
 
   // Tiptap Editors
   const challengeEditor = useEditor({
@@ -86,6 +89,11 @@ export default function EditProjectForm({ project, categories, tags }: { project
     setGalleryFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const removeExistingGalleryImage = (id: string) => {
+    setDeletedGalleryImageIds(prev => [...prev, id]);
+    setExistingGalleryImages(prev => prev.filter((img) => img.id !== id));
+  };
+
   const clearThumbnail = (e: React.MouseEvent) => {
     e.stopPropagation();
     setThumbnailFile(null);
@@ -101,6 +109,10 @@ export default function EditProjectForm({ project, categories, tags }: { project
     if (thumbnailFile) {
       formData.set("image", thumbnailFile);
     }
+    
+    deletedGalleryImageIds.forEach(id => {
+      formData.append("deleted_gallery_images", id);
+    });
     
     // Clear out any empty file inputs that might have been automatically included
     formData.delete("gallery_images");
@@ -166,6 +178,10 @@ export default function EditProjectForm({ project, categories, tags }: { project
                 {existingGalleryImages.map((img: any, idx: number) => (
                   <div key={`existing-${idx}`} className="relative group rounded-xl overflow-hidden shadow-lg border border-white/10">
                     <img src={img.image_url} alt={`Existing Gallery ${idx}`} className="h-32 w-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <button type="button" onClick={() => removeExistingGalleryImage(img.id)} className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 ))}
               </div>

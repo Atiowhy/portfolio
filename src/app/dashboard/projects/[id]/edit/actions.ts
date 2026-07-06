@@ -122,6 +122,16 @@ export async function updateProjectAction(prevState: FormState, formData: FormDa
       }
     }
 
+    // Delete existing gallery images that were marked for removal
+    const deletedGalleryImageIds = formData.getAll("deleted_gallery_images") as string[];
+    if (deletedGalleryImageIds.length > 0) {
+      const deletePromise = supabase
+        .from("project_images")
+        .delete()
+        .in("id", deletedGalleryImageIds);
+      uploadPromises.push(deletePromise);
+    }
+
     await Promise.all(uploadPromises);
 
     // 5. Update Relations (Categories & Tags)
